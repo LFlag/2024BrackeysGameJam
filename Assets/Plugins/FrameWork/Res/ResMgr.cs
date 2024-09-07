@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -15,14 +14,12 @@ public class ResMgr : BaseManager<ResMgr>
     /// <returns></returns>
     public T Load<T>(string path, UnityAction<T> callBack = null) where T : Object
     {
-        T obj = Resources.Load<T>(path);
+        var obj = Resources.Load<T>(path);
 
         callBack?.Invoke(obj);
 
-        // 如果资源是GameObject 则直接示例化
-        if (obj is GameObject)
-            return GameObject.Instantiate(obj);
-        return obj;
+        // 如果资源是GameObject 则直接实例化
+        return obj is GameObject ? GameObject.Instantiate(obj) : obj;
     }
 
     /// <summary>
@@ -31,15 +28,13 @@ public class ResMgr : BaseManager<ResMgr>
     /// <param name="path"> 资源路径 </param>
     /// <param name="callBack"> 加载完调用的回调函数 </param>
     /// <typeparam name="T"> 加载类型 </typeparam>
-    public void LoadAsync<T>(string path, UnityAction<T> callBack = null) where T : Object
-    {
+    public void LoadAsync<T>(string path, UnityAction<T> callBack = null) where T : Object =>
         MonoMgr.Instance.StartCoroutine(LoadCoroutine(path, callBack));
-    }
 
     // 配合异步加载使用的协程
     IEnumerator LoadCoroutine<T>(string path, UnityAction<T> callBack = null) where T : Object
     {
-        ResourceRequest request = Resources.LoadAsync<T>(path);
+        var request = Resources.LoadAsync<T>(path);
         yield return request;
 
         if (request.asset is GameObject)
